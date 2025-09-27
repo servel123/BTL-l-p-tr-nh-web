@@ -277,7 +277,7 @@
     </div>
 
     <script>
-        // Sample book data array
+        
         const booksData = [
             {
                 id: 1,
@@ -389,25 +389,25 @@
             }
         ];
 
-        // Application state
+       
         let currentBooks = [...booksData];
         let currentGenre = 'all';
         let searchTerm = '';
 
-        // DOM elements
+       
         const booksContainer = document.getElementById('booksList');
         const searchInput = document.getElementById('searchInput');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const statsDisplay = document.getElementById('statsDisplay');
 
-        // Initialize the application
+        
         function initializeApp() {
             renderBooks(currentBooks);
             updateStats();
             setupEventListeners();
         }
 
-        // Render books to the DOM
+        
         function renderBooks(books) {
             if (books.length === 0) {
                 booksContainer.innerHTML = `
@@ -435,7 +435,7 @@
             booksContainer.innerHTML = booksHTML;
         }
 
-        // Update statistics display
+       
         function updateStats() {
             const total = booksData.length;
             const filtered = currentBooks.length;
@@ -448,28 +448,28 @@
             }
         }
 
-        // Filter books by genre
+      
         function filterByGenre(genre) {
             currentGenre = genre;
             applyFilters();
         }
 
-        // Search books
+        
         function searchBooks(term) {
             searchTerm = term.toLowerCase();
             applyFilters();
         }
 
-        // Apply all filters (genre + search)
+        
         function applyFilters() {
             let filteredBooks = [...booksData];
 
-            // Apply genre filter
+            
             if (currentGenre !== 'all') {
                 filteredBooks = filteredBooks.filter(book => book.genre === currentGenre);
             }
 
-            // Apply search filter
+            
             if (searchTerm) {
                 filteredBooks = filteredBooks.filter(book => 
                     book.title.toLowerCase().includes(searchTerm) ||
@@ -483,27 +483,27 @@
             updateStats();
         }
 
-        // Setup event listeners
+        
         function setupEventListeners() {
-            // Search functionality
+            
             searchInput.addEventListener('input', (e) => {
                 searchBooks(e.target.value);
             });
 
-            // Genre filter buttons
+            
             filterButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
-                    // Update active button
+                   
                     filterButtons.forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
 
-                    // Filter books
+                    
                     const genre = e.target.getAttribute('data-genre');
                     filterByGenre(genre);
                 });
             });
 
-            // Clear search on escape
+            
             searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     searchInput.value = '';
@@ -512,29 +512,29 @@
             });
         }
 
-        // Start the application when DOM is loaded
+        
         document.addEventListener('DOMContentLoaded', initializeApp);
 
-        // Optional: Add books dynamically (demonstration)
+       
         function addBook(bookData) {
             const newBook = {
                 id: booksData.length + 1,
                 ...bookData
             };
             booksData.push(newBook);
-            applyFilters(); // Refresh display
+            applyFilters(); 
         }
 
-        // Optional: Remove book by ID
+        
         function removeBook(bookId) {
             const index = booksData.findIndex(book => book.id === bookId);
             if (index > -1) {
                 booksData.splice(index, 1);
-                applyFilters(); // Refresh display
+                applyFilters(); 
             }
         }
 
-        // Make functions available globally for console testing
+      
         window.BookListApp = {
             addBook,
             removeBook,
