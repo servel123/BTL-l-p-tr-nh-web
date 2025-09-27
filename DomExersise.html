@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookList Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 45px 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #f0f0f0;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stats {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .book-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .book-author {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .book-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .book-year, .book-pages {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .book-genre {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .book-description {
+            color: #666;
+            line-height: 1.6;
+            margin-top: 15px;
+            font-size: 0.95rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .no-results h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .book-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 My Book Library</h1>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search books by title, author, or genre...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-genre="all">All Books</button>
+                <button class="filter-btn" data-genre="Fiction">Fiction</button>
+                <button class="filter-btn" data-genre="Science">Science</button>
+                <button class="filter-btn" data-genre="Mystery">Mystery</button>
+                <button class="filter-btn" data-genre="Romance">Romance</button>
+                <button class="filter-btn" data-genre="Biography">Biography</button>
+            </div>
+        </div>
+
+        <div class="stats" id="statsDisplay">
+            Loading books...
+        </div>
+
+        <div id="booksList" class="books-grid">
+            <div class="loading">📖 Loading your amazing book collection...</div>
+        </div>
+    </div>
+
+    <script>
+        // Sample book data array
+        const booksData = [
+            {
+                id: 1,
+                title: "The Great Gatsby",
+                author: "F. Scott Fitzgerald",
+                genre: "Fiction",
+                year: 1925,
+                pages: 180,
+                description: "A classic American novel set in the Jazz Age, exploring themes of wealth, love, idealism, and moral decay in the Roaring Twenties."
+            },
+            {
+                id: 2,
+                title: "To Kill a Mockingbird",
+                author: "Harper Lee",
+                genre: "Fiction",
+                year: 1960,
+                pages: 376,
+                description: "A gripping tale of racial injustice and childhood innocence in the American South, told through the eyes of Scout Finch."
+            },
+            {
+                id: 3,
+                title: "1984",
+                author: "George Orwell",
+                genre: "Fiction",
+                year: 1949,
+                pages: 328,
+                description: "A dystopian masterpiece about totalitarianism, surveillance, and the power of language in shaping reality."
+            },
+            {
+                id: 4,
+                title: "Pride and Prejudice",
+                author: "Jane Austen",
+                genre: "Romance",
+                year: 1813,
+                pages: 432,
+                description: "A timeless romance exploring themes of love, marriage, money, and social expectations in Georgian England."
+            },
+            {
+                id: 5,
+                title: "The Catcher in the Rye",
+                author: "J.D. Salinger",
+                genre: "Fiction",
+                year: 1951,
+                pages: 277,
+                description: "A controversial coming-of-age story following teenager Holden Caulfield's experiences in New York City."
+            },
+            {
+                id: 6,
+                title: "Sapiens",
+                author: "Yuval Noah Harari",
+                genre: "Science",
+                year: 2011,
+                pages: 443,
+                description: "A fascinating exploration of human history, from the emergence of Homo sapiens to the present day."
+            },
+            {
+                id: 7,
+                title: "The Girl with the Dragon Tattoo",
+                author: "Stieg Larsson",
+                genre: "Mystery",
+                year: 2005,
+                pages: 590,
+                description: "A gripping Swedish crime thriller combining murder mystery with financial intrigue and social commentary."
+            },
+            {
+                id: 8,
+                title: "Steve Jobs",
+                author: "Walter Isaacson",
+                genre: "Biography",
+                year: 2011,
+                pages: 656,
+                description: "An intimate portrait of the Apple co-founder, exploring his innovative genius and complex personality."
+            },
+            {
+                id: 9,
+                title: "The Alchemist",
+                author: "Paulo Coelho",
+                genre: "Fiction",
+                year: 1988,
+                pages: 163,
+                description: "An inspiring tale of a young shepherd's journey to find treasure, discovering the importance of following one's dreams."
+            },
+            {
+                id: 10,
+                title: "Gone Girl",
+                author: "Gillian Flynn",
+                genre: "Mystery",
+                year: 2012,
+                pages: 419,
+                description: "A psychological thriller about a marriage gone terribly wrong, exploring themes of deception and media manipulation."
+            },
+            {
+                id: 11,
+                title: "The Notebook",
+                author: "Nicholas Sparks",
+                genre: "Romance",
+                year: 1996,
+                pages: 214,
+                description: "A heartwarming love story spanning decades, showing the enduring power of true love and devotion."
+            },
+            {
+                id: 12,
+                title: "A Brief History of Time",
+                author: "Stephen Hawking",
+                genre: "Science",
+                year: 1988,
+                pages: 256,
+                description: "An accessible exploration of cosmology, black holes, and the nature of time and universe."
+            }
+        ];
+
+        // Application state
+        let currentBooks = [...booksData];
+        let currentGenre = 'all';
+        let searchTerm = '';
+
+        // DOM elements
+        const booksContainer = document.getElementById('booksList');
+        const searchInput = document.getElementById('searchInput');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const statsDisplay = document.getElementById('statsDisplay');
+
+        // Initialize the application
+        function initializeApp() {
+            renderBooks(currentBooks);
+            updateStats();
+            setupEventListeners();
+        }
+
+        // Render books to the DOM
+        function renderBooks(books) {
+            if (books.length === 0) {
+                booksContainer.innerHTML = `
+                    <div class="no-results">
+                        <h3>📚 No books found</h3>
+                        <p>Try adjusting your search or filter criteria</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const booksHTML = books.map(book => `
+                <div class="book-card">
+                    <h3 class="book-title">${book.title}</h3>
+                    <div class="book-author">by ${book.author}</div>
+                    <div class="book-meta">
+                        <div class="book-year">📅 ${book.year}</div>
+                        <div class="book-pages">📄 ${book.pages} pages</div>
+                    </div>
+                    <span class="book-genre">${book.genre}</span>
+                    <p class="book-description">${book.description}</p>
+                </div>
+            `).join('');
+
+            booksContainer.innerHTML = booksHTML;
+        }
+
+        // Update statistics display
+        function updateStats() {
+            const total = booksData.length;
+            const filtered = currentBooks.length;
+            const genreText = currentGenre === 'all' ? 'all genres' : currentGenre;
+            
+            if (searchTerm) {
+                statsDisplay.textContent = `Showing ${filtered} of ${total} books matching "${searchTerm}" in ${genreText}`;
+            } else {
+                statsDisplay.textContent = `Showing ${filtered} of ${total} books in ${genreText}`;
+            }
+        }
+
+        // Filter books by genre
+        function filterByGenre(genre) {
+            currentGenre = genre;
+            applyFilters();
+        }
+
+        // Search books
+        function searchBooks(term) {
+            searchTerm = term.toLowerCase();
+            applyFilters();
+        }
+
+        // Apply all filters (genre + search)
+        function applyFilters() {
+            let filteredBooks = [...booksData];
+
+            // Apply genre filter
+            if (currentGenre !== 'all') {
+                filteredBooks = filteredBooks.filter(book => book.genre === currentGenre);
+            }
+
+            // Apply search filter
+            if (searchTerm) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.title.toLowerCase().includes(searchTerm) ||
+                    book.author.toLowerCase().includes(searchTerm) ||
+                    book.genre.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            currentBooks = filteredBooks;
+            renderBooks(currentBooks);
+            updateStats();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+                searchBooks(e.target.value);
+            });
+
+            // Genre filter buttons
+            filterButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    // Filter books
+                    const genre = e.target.getAttribute('data-genre');
+                    filterByGenre(genre);
+                });
+            });
+
+            // Clear search on escape
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    searchInput.value = '';
+                    searchBooks('');
+                }
+            });
+        }
+
+        // Start the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        // Optional: Add books dynamically (demonstration)
+        function addBook(bookData) {
+            const newBook = {
+                id: booksData.length + 1,
+                ...bookData
+            };
+            booksData.push(newBook);
+            applyFilters(); // Refresh display
+        }
+
+        // Optional: Remove book by ID
+        function removeBook(bookId) {
+            const index = booksData.findIndex(book => book.id === bookId);
+            if (index > -1) {
+                booksData.splice(index, 1);
+                applyFilters(); // Refresh display
+            }
+        }
+
+        // Make functions available globally for console testing
+        window.BookListApp = {
+            addBook,
+            removeBook,
+            booksData,
+            searchBooks,
+            filterByGenre
+        };
+    </script>
+</body>
+</html>
